@@ -12,6 +12,7 @@ include_directories(${CALABASH_INCLUDE})
 
 add_subdirectory(src)
 add_subdirectory(third_party)
+add_subdirectory(test)
 
 
 add_executable(server server.cpp)
