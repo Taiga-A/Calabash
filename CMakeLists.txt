@@ -4,8 +4,9 @@ project(Calabash)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CALABASH_INCLUDE
-        ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_SOURCE_DIR}/third_party/sqlite3/include)
+        ${PROJECT_SOURCE_DIR}/src/include
+        ${PROJECT_SOURCE_DIR}/third_party/sqlite3/include
+        ${PROJECT_SOURCE_DIR}/third_party/googletest/googletest/include)
 
 include_directories(${CALABASH_INCLUDE})
 
