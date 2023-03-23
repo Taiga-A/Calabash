@@ -18,9 +18,10 @@
 #define ERROR(arg...) calabash::Logger::Instance()->Error(arg)
 #define CONSOLE(s) calabash::Logger::Console(s, __FILE__, __LINE__)
 
-#define ASSERT(t) if (!(t)) {                                                \
-  std::cerr << "assert false: File:" << __FILE__ << " Line:" << __LINE__ ;   \
-  ERROR(std::string("assert false: File: ") + __FILE__ + " " + __LINE__);    \
+#define ASSERT(t) if (!(t)) {                                                 \
+  std::cerr << "assert false: File:" << __FILE__ << " Line:" << __LINE__ ;    \
+  ERROR(std::string("assert false: File: ") + __FILE__ + " " + std::to_string(__LINE__), -1); \
+                                                                              \
 }
 
 #define LOGGER_CLEAR_FILE_AT_START
