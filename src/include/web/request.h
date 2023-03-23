@@ -5,8 +5,6 @@
 #include <string>
 #include <map>
 
-#include <json/json.h>
-
 namespace calabash {
 class Request {
   friend class RequestMaker;
@@ -29,10 +27,10 @@ class Request {
   std::string body_;
   size_t body_size_{};
   std::string from_ip_;
-  std::multimap<std::string, std::string> params_;
-  std::multimap<std::string, std::string> form_data_;
-  std::multimap<std::string, std::string> headers_;
-  std::multimap<std::string, std::string> cookies_;
+  std::map<std::string, std::string> params_;
+  std::map<std::string, std::string> form_data_;
+  std::map<std::string, std::string> headers_;
+  std::map<std::string, std::string> cookies_;
 };
 
 }

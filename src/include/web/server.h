@@ -25,16 +25,16 @@ class Server {
   explicit Server(const ServerConfig &server_config = {});
   ~Server() = default;
 
-  void listen(const std::string &ip, int port);
-  void start();
+  void Listen(const std::string &ip, int port);
+  void Start();
   void Stop();
 
   void set_threads(int threads);
   void set_connects(int connects);
   void set_wait_time(int wait_time);
 
-  void bind(const std::string &path, server_handler handler);
-  Response handle(const Request &req);
+  void Bind(const std::string &path, server_handler handler);
+  Response Handle(const Request &req);
   void StaticPath(std::string path);
 
  private:

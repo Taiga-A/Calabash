@@ -12,7 +12,6 @@ using namespace calabash;
     ERROR(string("Can't open database: ") + sqlite3_errmsg(db_), -1);
   } else {
     SYSTEM("Open database successful!");
-    CONSOLE("Open database successful!");
   }
 }
 
@@ -35,8 +34,6 @@ vector<vector<Sqlite3Data>> Sqlite3::SQL(const string &sql) {
   int del_status;
   if ((del_status = sqlite3_finalize(sql_program)) != SQLITE_OK) {
     ERROR(string("Sql del err :") + sqlite3_errmsg(db_) + " " + to_string(del_status));
-  } else {
-    INFO("Run SQL Successful! " + sql);
   }
   return ret;
 }
@@ -51,8 +48,6 @@ void Sqlite3::BindCompiledSQL(const string &sql_name, const string &sql) {
       nullptr);
   if (status != SQLITE_OK) {
     ERROR("SQL compilation failed: " + sql_name + " " + sqlite3_errmsg(db_), -1);
-  } else {
-    INFO("Bind SQL_Compiled Successful! " + sql_name);
   }
   sql_map_.insert({sql_name, sql_res});
 }
@@ -68,8 +63,6 @@ sqlite3_stmt *Sqlite3::CompileSQL(const string &sql) {
   if (status != SQLITE_OK) {
     ERROR("SQL compilation failed: \n\t\t" + sql + "\n\t\t" + sqlite3_errmsg(db_), -1);
     return nullptr;
-  } else {
-    INFO("Compiled SQL Successful! " + sql);
   }
   return sql_res;
 }
@@ -107,7 +100,7 @@ Sqlite3Data Sqlite3::FmtData(sqlite3_stmt *stmt, int index) {
       break;
     case DBValType::TEXT:
       dat.text_data = string(
-          reinterpret_cast<const char *>(sqlite3_column_blob(stmt, index)),
+          reinterpret_cast<const char *>(sqlite3_column_text(stmt, index)),
           sqlite3_column_bytes(stmt, index));
       break;
     case DBValType::DAT_NULL:

@@ -87,7 +87,7 @@ std::vector<std::vector<Sqlite3Data>> Sqlite3::CallCompiledSQL(const std::string
 }
 
 void Sqlite3::BindCompiledSQLParam(sqlite3_stmt *, int index) {
-  INFO("Bind SQL Params Successful! Param num : " + std::to_string(index - 1));
+//  INFO("Bind SQL Params Successful! Param num : " + std::to_string(index - 1));
 }
 
 template<class... Arg>
@@ -110,7 +110,7 @@ template<class... Arg>
 
 template<class... Arg>
 [[maybe_unused]] void Sqlite3::BindCompiledSQLParam(sqlite3_stmt *stmt, int index, const std::string &val, Arg... arg) {
-  int bind_status = sqlite3_bind_text(stmt, index, val.c_str(), static_cast<int>(val.size()), SQLITE_STATIC);
+  int bind_status = sqlite3_bind_text(stmt, index, val.c_str(), static_cast<int>(val.size()), SQLITE_TRANSIENT);
   if (bind_status != SQLITE_OK) {
     ERROR(std::string("Sql bind err :") + sqlite3_errmsg(db_) + " " + std::to_string(bind_status));
   }

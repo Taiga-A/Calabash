@@ -10,7 +10,7 @@ using namespace std;
 void HttpTask::operator()(Server *server, SocketHandler *handler, Socket *socket) {
   Request req;
   if (RequestMaker::Parse(socket, &req)) {
-    Response res = server->handle(req);
+    Response res = server->Handle(req);
     DataReader &data_reader = res.GetDataReader();
 
     data_reader.BufferRead([&](const char *buf, size_t size) -> size_t {

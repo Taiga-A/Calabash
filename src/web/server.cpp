@@ -14,6 +14,14 @@ Server::Server(const ServerConfig &server_config) {
   m_threads = server_config.threads;
   m_connects = server_config.connects;
   m_wait_time = server_config.wait_time;
+}
+
+void Server::Listen(const string &ip, int port) {
+  m_ip = ip;
+  m_port = port;
+}
+
+void Server::Start() {
   thread_pool_ = make_shared<ThreadPool>(m_threads);
   auto func = [this](auto &&PH1, auto &&PH2) {
     return HttpTask()(this,
@@ -21,14 +29,6 @@ Server::Server(const ServerConfig &server_config) {
                       std::forward<decltype(PH2)>(PH2));
   };
   socket_handler_ = make_shared<SocketHandler>(func, thread_pool_);
-}
-
-void Server::listen(const string &ip, int port) {
-  m_ip = ip;
-  m_port = port;
-}
-
-void Server::start() {
   socket_handler_->listen(m_ip, m_port);
   socket_handler_->handle(m_connects, m_wait_time);
 }
@@ -45,7 +45,7 @@ void Server::set_wait_time(int wait_time) {
   m_wait_time = wait_time;
 }
 
-void Server::bind(const string &path, server_handler handler) {
+void Server::Bind(const string &path, server_handler handler) {
   m_handlers[path] = std::move(handler);
 }
 
@@ -53,7 +53,7 @@ void Server::StaticPath(string path) {
   static_path_ = std::move(path);
 };
 
-Response Server::handle(const Request &req) {
+Response Server::Handle(const Request &req) {
   const string &path = req.path();
 
   auto it = m_handlers.find(path);
@@ -80,4 +80,6 @@ Response Server::handle(const Request &req) {
 
 void Server::Stop() {
   socket_handler_->stop();
+  socket_handler_ = nullptr;
+  thread_pool_ = nullptr;
 }
