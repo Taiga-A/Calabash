@@ -39,7 +39,9 @@
 *.exe
 *.out
 *.app
-main
+
+# cmake
+cmake-build-*
 
 # Output
 bin/
