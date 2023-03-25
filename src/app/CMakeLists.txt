@@ -1,6 +1,8 @@
 add_library(calabash_app
         OBJECT
         student_mange_server.cpp
+        token.cpp
+        app_business.cpp
         )
 
 set(ALL_OBJECT_FILES

@@ -7,21 +7,17 @@ using namespace std;
 
 const char Logger::log_base_dir_[] = "./log/";
 
-Logger::Logger() {
-  today_ = GetNowTime()->tm_mday;
-#ifdef LOGGER_CLEAR_FILE_AT_START
-  output_.open(GetFileNameByDate(), ios::out);
-  output_ << "Clear this file before start,because defined LOGGER_CLEAR_FILE_AT_START" << endl;
-#else
-  output_.open(GetFileNameByDate(), ios::app | ios::out);
-#endif
-}
-
 void Logger::Log(const string &s) {
-  auto auto_mutex = lock_guard(mutex_);
+  auto auto_mutex = lock_guard(re_mutex);
   if (today_ != GetNowTime()->tm_mday) {
+    today_ = GetNowTime()->tm_mday;
     output_.close();
+#ifdef LOGGER_CLEAR_FILE_AT_START
+    output_.open(GetFileNameByDate(), ios::out);
+    SYSTEM("defined LOGGER_CLEAR_FILE_AT_START");
+#else
     output_.open(GetFileNameByDate(), ios::app | ios::out);
+#endif
   }
   if (output_.bad()) {
     std::cerr << GetTimeStr() << " output stream bad, Log failed!" << endl;
@@ -31,15 +27,17 @@ void Logger::Log(const string &s) {
 }
 
 Logger::~Logger() {
-  output_.close();
+  if (output_.is_open())
+    output_.close();
 }
 
 Logger *Logger::Instance() {
   static Logger *instance{};
   static std::mutex mutex_tmp;
   auto auto_mutex = lock_guard(mutex_tmp);
-  if (instance == nullptr)
+  if (instance == nullptr) {
     instance = new Logger();
+  }
   return instance;
 }
 

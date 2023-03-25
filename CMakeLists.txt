@@ -7,7 +7,7 @@ set(CALABASH_INCLUDE
         ${PROJECT_SOURCE_DIR}/src/include
         ${PROJECT_SOURCE_DIR}/third_party/sqlite3/include
         ${PROJECT_SOURCE_DIR}/third_party/googletest/googletest/include
-        ${PROJECT_SOURCE_DIR}/third_party/nlohmann_json/single_include/nlohmann)
+        ${PROJECT_SOURCE_DIR}/third_party/nlohmann_json/single_include)
 
 include_directories(${CALABASH_INCLUDE})
 

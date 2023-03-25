@@ -30,6 +30,16 @@ struct Sqlite3Data {
   [[nodiscard]] std::string to_string() const;
 };
 
+struct Sqlite3ColumnMetadata {
+  bool exist;
+  bool not_null;
+  bool primary_key;
+  bool auto_inc;
+  std::string type;
+  std::string sort_rule;
+  std::string column_name;
+};
+
 class Sqlite3 {
  public:
   using DBResType = std::vector<std::vector<Sqlite3Data>>;
@@ -40,6 +50,7 @@ class Sqlite3 {
 
   [[maybe_unused]] DBResType SQL(const std::string &sql);
   [[maybe_unused]] void BindCompiledSQL(const std::string &sql_name, const std::string &sql);
+  Sqlite3ColumnMetadata TestColumn(const std::string &table_name, const std::string &column_name, const std::string &database_name = "");
 
   template<class ...Arg>
   [[maybe_unused]] DBResType CallCompiledSQL(const std::string &sql_name, Arg...);
@@ -71,7 +82,7 @@ inline std::ostream &operator<<(std::ostream &os, const Sqlite3Data &dat) {
 template<class... Arg>
 std::vector<std::vector<Sqlite3Data>> Sqlite3::CallCompiledSQL(const std::string &sql_name, Arg... arg) {
   if (sql_map_.find(sql_name) == sql_map_.end()) {
-    WARRING("Not found such SQL name like: " + sql_name);
+    WARNING("Not found such SQL name like: " + sql_name);
     return {};
   }
   sqlite3_stmt *stmt = sql_map_.find(sql_name)->second;

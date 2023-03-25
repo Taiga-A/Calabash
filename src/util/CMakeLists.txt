@@ -3,6 +3,7 @@ add_library(calabash_util
         logger.cpp
         data_reader.cpp
         md5.cpp
+        base64.cpp
         )
 
 set(ALL_OBJECT_FILES

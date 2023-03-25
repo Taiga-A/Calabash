@@ -21,7 +21,7 @@ class Response {
   void page_not_found();
 
   void SetHeader(const std::string &k, const std::string &v);
-  inline void SetType(const std::string &type) { SetHeader("Content-Type", type); };
+  void SetType(const std::string &type);
   void AutoSetType(const std::filesystem::path &path);
   inline void SetHtmlType() { SetType(".html"); };
   inline void SetJsonType() { SetType(".json"); };

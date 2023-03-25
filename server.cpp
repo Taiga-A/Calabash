@@ -1,5 +1,6 @@
 #include <iostream>
 #include "web/server.h"
+#include "app/student_mange_server.h"
 #include "sqlite3.h"
 
 using namespace std;
@@ -14,30 +15,10 @@ void hello(const Request &req, Response &resp) {
 }
 
 int main() {
-  Server server;
-  server.Listen("", 8080);
-  server.Bind("/hello", hello);
-  server.StaticPath("./static");
+  auto server = StudentMangeServer::Instance();
 
+  server->Init(7777);
+  server->Start();
 
-  thread t = thread([&](){
-    cout << "start1" << endl;
-    server.Start();
-  });
-
-  this_thread::sleep_for(10s);
-  cout << "stop" << endl;
-  server.Stop();
-  t.join();
-
-
-
-  t = thread([&](){
-    cout << "start2" << endl;
-    server.Start();
-  });
-  this_thread::sleep_for(10s);
-  cout << "stop" << endl;
-  server.Stop();
-  t.join();
+  while(true);
 }

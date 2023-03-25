@@ -14,7 +14,7 @@
 
 #define SYSTEM(s) calabash::Logger::Instance()->System(s)
 #define INFO(s) calabash::Logger::Instance()->Info(s)
-#define WARRING(s) calabash::Logger::Instance()->Warring(s)
+#define WARNING(s) calabash::Logger::Instance()->Warning(s)
 #define ERROR(arg...) calabash::Logger::Instance()->Error(arg)
 #define CONSOLE(s) calabash::Logger::Console(s, __FILE__, __LINE__)
 
@@ -40,14 +40,14 @@ class Logger {
 
   inline void Info(const std::string &s);
   inline void System(const std::string &s);
-  inline void Warring(const std::string &s);
+  inline void Warning(const std::string &s);
   inline void Error(const std::string &s);
   inline void Error(const std::string &s, int code);
 
   static inline void Console(const std::string &s, const char *file, int line);
 
  private:
-  Logger();
+  Logger() = default;
   ~Logger();
 
   void Log(const std::string &s);
@@ -57,10 +57,11 @@ class Logger {
 
  private:
   static const char log_base_dir_[];
-  int today_;
+  int today_ = -1;
   std::string filename_;
   std::ofstream output_;
   std::mutex mutex_;
+  std::recursive_mutex re_mutex;
 };
 
 tm *Logger::GetNowTime() {
@@ -82,15 +83,15 @@ std::string Logger::GetFileNameByDate() {
 }
 
 void Logger::System(const std::string &s) {
-  Log("System  | " + s);
+  Log("SYSTEM  | " + s);
 }
 
 void Logger::Info(const std::string &s) {
   Log("INFO    | " + s);
 }
 
-void Logger::Warring(const std::string &s) {
-  Log("WARRING | " + s);
+void Logger::Warning(const std::string &s) {
+  Log("WARNING | " + s);
 }
 
 void Logger::Error(const std::string &s, int code) {
@@ -116,14 +117,15 @@ void print(const std::vector<T> &arr) {
 
 template<typename T>
 void print(const std::vector<std::vector<T>> &arr) {
+  int lines = 1;
   for (const std::vector<T> &arr_ : arr) {
+    std::cout << lines++ << " : ";
     for (const T &th : arr_) {
       std::cout << th << " ";
     }
     std::cout << std::endl;
   }
-  std::cout << std::endl;
 }
 
-}
+} // namespace calabash
 

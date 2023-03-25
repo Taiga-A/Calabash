@@ -11,7 +11,7 @@ using namespace calabash;
   if (sqlite3_open(database_path.c_str(), &db_) != SQLITE_OK) {
     ERROR(string("Can't open database: ") + sqlite3_errmsg(db_), -1);
   } else {
-    SYSTEM("Open database successful!");
+    INFO("Open database successful!");
   }
 }
 
@@ -47,7 +47,9 @@ void Sqlite3::BindCompiledSQL(const string &sql_name, const string &sql) {
       &sql_res,
       nullptr);
   if (status != SQLITE_OK) {
-    ERROR("SQL compilation failed: " + sql_name + " " + sqlite3_errmsg(db_), -1);
+    WARNING("SQL compilation failed: " + sql_name + " " + sqlite3_errmsg(db_));
+  } else {
+    INFO("SQL bind " + sql_name + " successful!");
   }
   sql_map_.insert({sql_name, sql_res});
 }
@@ -61,7 +63,7 @@ sqlite3_stmt *Sqlite3::CompileSQL(const string &sql) {
       &sql_res,
       nullptr);
   if (status != SQLITE_OK) {
-    ERROR("SQL compilation failed: \n\t\t" + sql + "\n\t\t" + sqlite3_errmsg(db_), -1);
+    WARNING(string("SQL compilation failed: \n") + sql + "\n" + sqlite3_errmsg(db_));
     return nullptr;
   }
   return sql_res;
@@ -107,6 +109,34 @@ Sqlite3Data Sqlite3::FmtData(sqlite3_stmt *stmt, int index) {
     default:break;
   }
   return dat;
+}
+
+Sqlite3ColumnMetadata Sqlite3::TestColumn(const std::string &table_name,
+                                          const string &column_name,
+                                          const string &database_name) {
+  Sqlite3ColumnMetadata ret;
+  ret.column_name = column_name;
+  const char *type_c;
+  const char *rule_c;
+  int status = sqlite3_table_column_metadata(
+      db_,
+      database_name.empty() ? nullptr : database_name.c_str(),
+      table_name.c_str(),
+      column_name.c_str(),
+      &type_c,
+      &rule_c,
+      reinterpret_cast<int *>(&ret.not_null),
+      reinterpret_cast<int *>(&ret.primary_key),
+      reinterpret_cast<int *>(&ret.auto_inc)
+  );
+  if (status != SQLITE_OK) {
+    ret.exist = false;
+    return ret;
+  }
+  ret.exist = true;
+  ret.sort_rule = string(rule_c);
+  ret.type = string(type_c);
+  return ret;
 }
 
 std::string Sqlite3Data::to_string() const {

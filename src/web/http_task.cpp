@@ -8,6 +8,7 @@ using namespace calabash;
 using namespace std;
 
 void HttpTask::operator()(Server *server, SocketHandler *handler, Socket *socket) {
+
   Request req;
   if (RequestMaker::Parse(socket, &req)) {
     Response res = server->Handle(req);
@@ -17,7 +18,7 @@ void HttpTask::operator()(Server *server, SocketHandler *handler, Socket *socket
       return socket->send(buf, size);
     });
 
-    SYSTEM(socket->ip() + " " + req.method() + " " + to_string(res.code()) +
+    INFO(socket->ip() + " " + req.method() + "-" + to_string(res.code()) +
         "\t" + to_string(req.body_size()) + "Byte " + "--> " +
         to_string(static_cast<double>(data_reader.Size()) / 1024 / 1024) + "MB\t"
                + req.path());

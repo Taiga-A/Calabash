@@ -2,22 +2,44 @@
 // Created by Taiga on 2023/3/8.
 //
 
-#include "database/sqlite3.h"
+#include "app/student_mange_server.h"
+#include "nlohmann/json.hpp"
+#include "app/token.h"
 #include "util/logger.h"
+#include "util/base64.h"
+#include "util/md5.h"
 
 using namespace std;
 using namespace calabash;
+using namespace nlohmann;
+
+string XOR(const string &val, const string &key) {
+  size_t i = 0;
+  string ret;
+  for (char th : val) {
+    ret.push_back(static_cast<char>(th ^ key[i]));
+    i = (i + 1) % key.size();
+  }
+  return ret;
+}
+
+string Encode(const string &val, const string &key) {
+  return Base64::Encode(XOR(val, key));
+}
+
+string Decode(const string &val, const string &key) {
+  return XOR(Base64::Decode(val), key);
+}
 
 int main() {
-  Sqlite3 db("./test.db");
-//  db.SQL("CREATE TABLE students(name TEXT NOT NULL, id TEXT PRIMARY KEY NOT NULL, class TEXT, age INTEGER)");
-  db.BindCompiledSQL("insert", "INSERT INTO students (name, id, class, age) VALUES (?1, ?2, ?3, ?4)");
-  db.BindCompiledSQL("update_id_from_name", "UPDATE students SET id=?2 WHERE name=?1");
-  db.BindCompiledSQL("update_age_from_name", "UPDATE students SET age=?2 WHERE name=?1");
-  db.BindCompiledSQL("show_all", "SELECT * FROM students");
+//  auto server = StudentMangeServer::Instance();
+//  server->Init(8080, "test.db");
 
-  auto res = db.CallCompiledSQL("insert", "wyz", "2020984130604", "计科2006", 13);
-  res = db.CallCompiledSQL("show_all");
-  print(res);
+//  string str = MD5().Encode("wang123456");
+//
+//  cout << str << endl;
+
+
+
   return 0;
 }

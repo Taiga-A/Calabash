@@ -107,3 +107,7 @@ Response::Response(Response &&response) noexcept {
   headers_ = std::move(response.headers_);
 }
 
+void Response::SetType(const string &type) {
+  SetHeader("Content-Type", kHttpExtensionWithContentType[type]);
+}
+

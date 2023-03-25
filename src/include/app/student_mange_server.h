@@ -7,11 +7,17 @@
 
 #include "thread"
 #include "memory"
+#include "chrono"
 
-#include "database/sqlite3.h"
 #include "web/server.h"
 
+//#define DB_DROP_TABLES_AT_START
+
 namespace calabash {
+
+class Sqlite3;
+
+constexpr char kTokenKey[] = "calabash_token_password";
 
 class StudentMangeServer {
  private:
@@ -24,11 +30,14 @@ class StudentMangeServer {
   void Init(int port = 8080, const std::string& db_name = "calabash.db");
 
   void Start();
-  void Stop();
+  [[maybe_unused]] void Stop();
   [[nodiscard]] inline bool Status() const { return is_start_; };
 
  private:
   void DataBaseInit();
+
+  void app_login(const Request &req, Response &res);
+  void app_self(const Request &req, Response &res);
 
  private:
   bool is_init_ = false;
@@ -45,7 +54,6 @@ StudentMangeServer *StudentMangeServer::Instance() {
   }
   return p;
 }
-
 
 
 } // namespace calabash

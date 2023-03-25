@@ -12,12 +12,13 @@ class Request {
   Request() = default;
   ~Request() = default;
 
-  inline std::string method() { return method_; };
+  [[nodiscard]] inline std::string method() const { return method_; };
   inline void set_from_ip(const std::string &from_ip) { from_ip_ = from_ip; };
-  std::string header(const std::string &name) const;
-  std::string cookie(const std::string &name) const;
-  std::string path() const;
+  [[nodiscard]] std::string header(const std::string &name) const;
+  [[nodiscard]] std::string cookie(const std::string &name) const;
+  [[nodiscard]] std::string path() const;
   [[nodiscard]] size_t body_size() const { return body_size_; }
+  [[nodiscard]] inline std::string body() const { return body_; };
 
  private:
   std::string method_;

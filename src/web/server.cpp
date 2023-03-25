@@ -29,6 +29,7 @@ void Server::Start() {
                       std::forward<decltype(PH2)>(PH2));
   };
   socket_handler_ = make_shared<SocketHandler>(func, thread_pool_);
+  SYSTEM("Listen at port " + to_string(m_port));
   socket_handler_->listen(m_ip, m_port);
   socket_handler_->handle(m_connects, m_wait_time);
 }
