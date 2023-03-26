@@ -51,6 +51,7 @@ void StudentMangeServer::Init(int port, const std::string &db_name) {
   http_server_->Bind("/login", {MEMBER_FUN_BIND(app_login)});
   http_server_->Bind("/self", {app_token_parse, MEMBER_FUN_BIND(app_self)});
   http_server_->Bind("/leave", {app_token_parse, MEMBER_FUN_BIND(app_leave)});
+  http_server_->Bind("/release", {app_token_parse, MEMBER_FUN_BIND(app_release)});
 
   is_init_ = true;
 }
@@ -60,14 +61,14 @@ void StudentMangeServer::Init(int port, const std::string &db_name) {
 void StudentMangeServer::DataBaseInit() {
 #ifdef DB_DROP_TABLES_AT_START
   SYSTEM("Defined DB_DROP_TABLES_AT_START");
-  SYSTEM("Drop table students");
+  SYSTEM("Drop TABLE IF EXISTS students");
   db_->SQL("DROP TABLE students");
-  SYSTEM("Drop table teachers");
+  SYSTEM("Drop TABLE IF EXISTS teachers");
   db_->SQL("DROP TABLE teachers");
-  SYSTEM("Drop table leave_info");
+  SYSTEM("Drop TABLE IF EXISTS leave_info");
   db_->SQL("DROP TABLE leave_info");
-
 #endif
+
   SYSTEM("Load table students");
   db_->SQL(
 #include "inc/DBTable_students_SQL.inc"
@@ -91,12 +92,16 @@ void StudentMangeServer::DataBaseInit() {
        "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)");
   db_->BindCompiledSQL("student_info",
        "SELECT * FROM students WHERE id = ?1");
+  db_->BindCompiledSQL("student_teachers",
+       "SELECT instructor_id, mentor_id FROM students WHERE id = ?1");
   db_->BindCompiledSQL("student_password",
        "SELECT password FROM students WHERE id = ?1");
   db_->BindCompiledSQL("teacher_info",
        "SELECT * FROM teachers WHERE id = ?1");
   db_->BindCompiledSQL("teacher_password",
        "SELECT password FROM teachers WHERE id = ?1");
+  db_->BindCompiledSQL("select_leave_status",
+       "SELECT status FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("update_leave_info_status",
        "UPDATE leave_info SET status = ?2 WHERE inform_id = ?1");
   db_->BindCompiledSQL("select_leave_info_teacher",
@@ -114,4 +119,6 @@ void StudentMangeServer::TestJsonParam(const nlohmann::json &j, std::initializer
   if (!lost_params.empty())
     throw HttpException(403, "Lost param : " + string(lost_params.c_str() + 2));
 }
+
+
 

@@ -74,8 +74,8 @@ void StudentMangeServer::app_token_parse(Request &req, Response &res, const Next
 
 /**
  * @url /login
- * @input user 用户id
- * @input password 密码
+ * @input user text
+ * @input password text
  */
 void StudentMangeServer::app_login(const Request &req, Response &res, const NextFunc& next_func) {
   auto &req_body = req.json();
@@ -96,17 +96,14 @@ void StudentMangeServer::app_login(const Request &req, Response &res, const Next
 
 /**
  * @url /self
- * @input token
+ * @input token text
  */
 void StudentMangeServer::app_self(const Request &req, Response &res, const NextFunc& next_func) {
-  json req_body, res_body;
   string user_id = req.json()["user"];
-
   Sqlite3::DBResType db_res;
   if (user_id.size() < 10) {
     db_res = db_->CallCompiledSQL("teacher_info", user_id);
-    if (db_res.size() != 1)
-      throw HttpException(404, "not found user");
+    if (db_res.size() != 1) throw HttpException(404, "not found user");
     throw HttpException(json{{"data", {
         {"id", db_res[0][0].text_data},
         {"name", db_res[0][1].text_data},
@@ -117,8 +114,7 @@ void StudentMangeServer::app_self(const Request &req, Response &res, const NextF
   }
   else {
     db_res = db_->CallCompiledSQL("student_info", user_id);
-    if (db_res.size() != 1)
-      throw HttpException(404, "not found user");
+    if (db_res.size() != 1) throw HttpException(404, "not found user");
     throw HttpException(json{{"data", {
         {"id", db_res[0][0].text_data},
         {"name", db_res[0][1].text_data},
@@ -134,10 +130,43 @@ void StudentMangeServer::app_self(const Request &req, Response &res, const NextF
 
 /**
  * @url /leave
- * @input token
- *
+ * @input token text "must student"
+ * @input leave_type text
+ * @input leave_reason text
+ * @input time_begin text
+ * @input time_end  text
+ * @input is_school bool
  */
 void StudentMangeServer::app_leave(const Request &req, Response &res, const NextFunc &next_func) {
-
+  auto &req_body = req.json();
+  string user_id = req_body["user"];
+  TestJsonParam(req_body, {"leave_type", "leave_reason", "time_begin", "time_end", "is_school"});
+  Sqlite3::DBResType db_res = db_->CallCompiledSQL("student_teachers", user_id);
+  if (db_res.size() != 1) throw HttpException(404, "Not found student's teachers");
+  string mentor_id = db_res[0][1].text_data;
+  string instructor_id = db_res[0][0].text_data;
+  string leave_type = req_body["leave_type"].get<string>();
+  string leave_reason = req_body["leave_reason"].get<string>();
+  string time_begin = req_body["time_begin"].get<string>();
+  string time_end = req_body["time_end"].get<string>();
+  bool is_school = req_body["is_school"].get<bool>();
+  db_->CallCompiledSQL("insert_leave_info",
+       user_id, mentor_id, instructor_id, leave_type, leave_reason, time_begin, time_end, is_school, PendingApproval);
 }
 
+/**
+ * @url /release
+ * @input token text "must student"
+ * @input note_id number
+*/
+void StudentMangeServer::app_release(const Request &req, Response &res, const StudentMangeServer::NextFunc &next_func) {
+  auto &req_body = req.json();
+  string user_id = req_body["user"];
+  TestJsonParam(req_body, {"note_id"});
+  int note_id = static_cast<int>(req_body["note_id"].get<double>());
+  Sqlite3::DBResType db_res = db_->CallCompiledSQL("select_leave_status", note_id);
+  if (db_res.size() != 1) throw HttpException(404, "Not found leave info");
+  auto status = static_cast<LeaveStatus>(db_res[0][0].int_data);
+  if (status != LeaveStatus::Passed) throw HttpException(200, 403, "status must be passed.");
+  db_->CallCompiledSQL("update_leave_info_status", note_id, Destroyed);
+}

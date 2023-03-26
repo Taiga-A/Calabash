@@ -17,7 +17,7 @@ void hello(const Request &req, Response &resp) {
 int main() {
   auto server = StudentMangeServer::Instance();
 
-  server->Init(8080);
+  server->Init(7777);
   server->Start();
 
   while(true) {

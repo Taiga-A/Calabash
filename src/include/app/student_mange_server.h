@@ -28,6 +28,12 @@ class StudentMangeServer {
   ~StudentMangeServer() = default;
 
  public:
+  enum LeaveStatus {
+    PendingApproval = 0,  // wait
+    Passed = 1,           // pass
+    Rejection = 2,        // not pass
+    Destroyed = 3         // pass and back
+  };
   static inline StudentMangeServer *Instance();
 
   void Init(int port = 8080, const std::string& db_name = "calabash.db");
@@ -44,6 +50,7 @@ class StudentMangeServer {
   void app_login(const Request &req, Response &res, const NextFunc& next_func);
   void app_self(const Request &req, Response &res, const NextFunc& next_func);
   void app_leave(const Request &req, Response &res, const NextFunc& next_func);
+  void app_release(const Request &req, Response &res, const NextFunc& next_func);
 
   static void TestJsonParam(const nlohmann::json &j, std::initializer_list<std::string> params);
 
