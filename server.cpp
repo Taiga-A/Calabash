@@ -25,5 +25,12 @@ int main() {
     cin >> cmd;
     if (cmd == "exit")
       break;
+    if (server->Status() && cmd == "stop")
+      server->Stop();
+    if (cmd == "status")
+      cout << boolalpha << "run status: " << server->Status() << endl;
+    if (!server->Status() && cmd == "start")
+      server->Start();
   }
+  cout << "wait..." << endl;
 }

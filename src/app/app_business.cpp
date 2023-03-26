@@ -170,3 +170,58 @@ void StudentMangeServer::app_release(const Request &req, Response &res, const St
   if (status != LeaveStatus::Passed) throw HttpException(200, 403, "status must be passed.");
   db_->CallCompiledSQL("update_leave_info_status", note_id, Destroyed);
 }
+
+void StudentMangeServer::app_search_leave(const Request &req, Response &res, const NextFunc &next_func) {
+  auto &req_body = req.json();
+  string user_id = req_body["user"];
+  int page = 1;
+  int max_num = 50;
+  if (req_body.find("page") != req_body.end() && req_body.find("page") != req_body.end()) {
+    page = std::max(1, static_cast<int>(req_body["page"].get<double>()));
+    max_num = std::max(1, static_cast<int>(req_body["max_num"].get<double>()));
+  }
+  Sqlite3::DBResType db_res;
+  if (user_id.size() < 10) {
+    db_res = db_->CallCompiledSQL("select_leave_info_teacher", user_id);
+    if (db_res.empty())
+      db_res = db_->CallCompiledSQL("select_leave_info_mentor", user_id);
+  } else
+    db_res = db_->CallCompiledSQL("select_leave_info_student", user_id);
+
+  int bg = (page - 1) * max_num, ed = page * max_num;
+  json j{{"data", {}}};
+  for (int i = bg; i < db_res.size() && i < ed; i++) {
+    j["data"].push_back(json{
+       {"inform_id", db_res[i][0].int_data},
+       {"student_id", db_res[i][1].text_data},
+       {"mentor_id", db_res[i][2].text_data},
+       {"teacher_id", db_res[i][3].text_data},
+       {"leave_type", db_res[i][4].text_data},
+       {"leave_reason", db_res[i][5].text_data},
+       {"time_begin", db_res[i][6].text_data},
+       {"time_end", db_res[i][7].text_data},
+       {"is_school", static_cast<bool>(db_res[i][8].int_data)},
+       {"status", db_res[i][9].int_data},
+    });
+  }
+  throw HttpException(j);
+}
+
+void StudentMangeServer::app_approval(const Request &req, Response &res, const NextFunc &next_func) {
+  auto &req_body = req.json();
+  string user_id = req_body["user"];
+  TestJsonParam(req_body, {"note_id", "status"});
+  int note_id = static_cast<int>(req_body["note_id"].get<double>());
+  Sqlite3::DBResType db_res = db_->CallCompiledSQL("select_leave_status_teachers", note_id);
+  if (db_res.size() != 1)
+    throw HttpException(404, "Not found this leave.");
+  auto status = static_cast<LeaveStatus>(db_res[0][0].int_data);
+  if (user_id != db_res[0][1].text_data && user_id != db_res[0][2].text_data)
+    throw HttpException(403, "No permissions, you must be leave's teacher.");
+  if (status != LeaveStatus::PendingApproval)
+    throw HttpException(200, 403, "status must be pending approval.");
+  auto status_change = static_cast<LeaveStatus>(req_body["status"].get<int>());
+  if (status_change != LeaveStatus::Passed && status_change != LeaveStatus::Rejection)
+    throw HttpException(200, 403, "changed status must be passed or rejection.");
+  db_->CallCompiledSQL("update_leave_info_status", note_id, static_cast<int>(status_change));
+}

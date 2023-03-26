@@ -52,6 +52,8 @@ void StudentMangeServer::Init(int port, const std::string &db_name) {
   http_server_->Bind("/self", {app_token_parse, MEMBER_FUN_BIND(app_self)});
   http_server_->Bind("/leave", {app_token_parse, MEMBER_FUN_BIND(app_leave)});
   http_server_->Bind("/release", {app_token_parse, MEMBER_FUN_BIND(app_release)});
+  http_server_->Bind("/search_leave", {app_token_parse, MEMBER_FUN_BIND(app_search_leave)});
+  http_server_->Bind("/approval", {app_token_parse, MEMBER_FUN_BIND(app_approval)});
 
   is_init_ = true;
 }
@@ -102,10 +104,14 @@ void StudentMangeServer::DataBaseInit() {
        "SELECT password FROM teachers WHERE id = ?1");
   db_->BindCompiledSQL("select_leave_status",
        "SELECT status FROM leave_info WHERE inform_id = ?1");
+  db_->BindCompiledSQL("select_leave_status_teachers",
+                       "SELECT status, teacher_id, mentor_id FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("update_leave_info_status",
        "UPDATE leave_info SET status = ?2 WHERE inform_id = ?1");
   db_->BindCompiledSQL("select_leave_info_teacher",
        "SELECT * FROM leave_info WHERE teacher_id = ?1");
+  db_->BindCompiledSQL("select_leave_info_mentor",
+       "SELECT * FROM leave_info WHERE mentor_id = ?1");
   db_->BindCompiledSQL("select_leave_info_student",
        "SELECT * FROM leave_info WHERE student_id = ?1");
 }

@@ -51,9 +51,10 @@ class StudentMangeServer {
   void app_self(const Request &req, Response &res, const NextFunc& next_func);
   void app_leave(const Request &req, Response &res, const NextFunc& next_func);
   void app_release(const Request &req, Response &res, const NextFunc& next_func);
+  void app_search_leave(const Request &req, Response &res, const NextFunc& next_func);
+  void app_approval(const Request &req, Response &res, const NextFunc& next_func);
 
   static void TestJsonParam(const nlohmann::json &j, std::initializer_list<std::string> params);
-
 
  private:
   bool is_init_ = false;
