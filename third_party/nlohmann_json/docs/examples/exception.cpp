@@ -1,5 +1,6 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include "app/exception.h"
 
 using json = nlohmann::json;
 
@@ -18,3 +19,4 @@ int main()
                   << "exception id: " << e.id << std::endl;
     }
 }
+
