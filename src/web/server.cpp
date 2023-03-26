@@ -46,28 +46,41 @@ void Server::set_wait_time(int wait_time) {
   m_wait_time = wait_time;
 }
 
-void Server::Bind(const string &path, server_handler handler) {
-  m_handlers[path] = std::move(handler);
-}
-
 void Server::StaticPath(string path) {
   static_path_ = std::move(path);
-};
+}
 
-Response Server::Handle(const Request &req) {
+Response Server::Handle(Request &req) {
   const string &path = req.path();
 
-  auto it = m_handlers.find(path);
+  auto it = handlers_.find(path);
   Response resp;
-  if (it != m_handlers.end()) {
-    it->second(req, resp);
+  if (it != handlers_.end()) {
+    auto &func_list = it->second;
+    int process_func_index = -1;
+    int func_index = -1;
+    function<void()> next_func = [&]() {
+      if (process_func_index + 1 < process_handles.size()) {
+        process_func_index++;
+        process_handles[process_func_index](req, resp, next_func);
+      } else if (func_index + 1 < func_list.size()) {
+        func_index++;
+        func_list[func_index](req, resp, next_func);
+      } else if (func_index + 1 >= func_list.size()) {
+        WARNING("Func_list is over, call with nothing at " + path + " " + to_string(func_index));
+      }
+    };
+
+    next_func();
+
     return resp;
   }
 
   // static file path
   if (!static_path_.empty()) {
-    filesystem::path now_path = static_path_;
-    now_path += req.path();
+    filesystem::path now_path = static_path_ + req.path();
+    if (!filesystem::is_regular_file(now_path))
+      now_path = static_path_ + "/index.html";
     if (filesystem::is_regular_file(now_path)) {
       resp.AutoFileData(now_path);
       resp.AutoSetType(now_path);
@@ -84,3 +97,5 @@ void Server::Stop() {
   socket_handler_ = nullptr;
   thread_pool_ = nullptr;
 }
+
+

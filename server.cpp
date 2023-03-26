@@ -17,8 +17,13 @@ void hello(const Request &req, Response &resp) {
 int main() {
   auto server = StudentMangeServer::Instance();
 
-  server->Init(7777);
+  server->Init(8080);
   server->Start();
 
-  while(true);
+  while(true) {
+    string cmd;
+    cin >> cmd;
+    if (cmd == "exit")
+      break;
+  }
 }

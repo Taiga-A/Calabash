@@ -3,7 +3,6 @@
 //
 
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 
 #include "web/request_maker.h"
@@ -18,7 +17,7 @@ bool RequestMaker::Parse(Socket *socket, Request *req) {
   char buf[kReqBufSize];
   ssize_t base_size = socket->recv(buf, kReqBufSize);
   if (base_size <= 0) return false;
-  size_t head_size = 0;
+  size_t head_size;
   if ((head_size = ParseHttpHeader(buf, req)) == 0) return false;
   req->body_size_ = ::strtol(req->header("Content-Length").c_str(), nullptr, 10);
   req->from_ip_ = socket->ip();
@@ -34,6 +33,10 @@ bool RequestMaker::Parse(Socket *socket, Request *req) {
       req->body_ += string(buf, th_read);
       real_read += th_read;
     }
+  }
+
+  if (TestContentTypeJson(req->header("Content-Type"))) {
+    req->is_json_ = true;
   }
 
   return true;

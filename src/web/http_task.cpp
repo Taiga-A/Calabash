@@ -8,7 +8,6 @@ using namespace calabash;
 using namespace std;
 
 void HttpTask::operator()(Server *server, SocketHandler *handler, Socket *socket) {
-
   Request req;
   if (RequestMaker::Parse(socket, &req)) {
     Response res = server->Handle(req);
