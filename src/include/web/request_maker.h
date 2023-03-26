@@ -25,6 +25,7 @@ class RequestMaker {
   inline static std::vector<std::string> Split(std::string &str, char ch);
 
   inline static bool TestContentTypeMultipart(const std::string &str);
+  inline static bool TestContentTypeJson(const std::string &str);
 
   static std::string UrlEncode(const std::string &url);
   static std::string UrlDecode(const std::string &url);
@@ -66,6 +67,16 @@ std::vector<std::string> RequestMaker::Split(std::string &str, char ch) {
 
 bool RequestMaker::TestContentTypeMultipart(const std::string &str) {
   constexpr char multipart_text[] = "multipart";
+  for (int i = 0; i < sizeof(multipart_text) - 1; i++) {
+    if (multipart_text[i] != str[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool RequestMaker::TestContentTypeJson(const std::string &str) {
+  constexpr char multipart_text[] = "application/json";
   for (int i = 0; i < sizeof(multipart_text) - 1; i++) {
     if (multipart_text[i] != str[i]) {
       return false;

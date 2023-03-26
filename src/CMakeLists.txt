@@ -7,7 +7,7 @@ add_subdirectory(web)
 
 add_library(calabash
         STATIC
-        ${ALL_OBJECT_FILES})
+        ${ALL_OBJECT_FILES} include/app/exception.h)
 
 set(CALABASH_ALL_LIBS
         calabash_socket
