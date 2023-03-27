@@ -14,7 +14,7 @@ using namespace nlohmann;
 using namespace calabash;
 using namespace std;
 
-void StudentMangeServer::app_process_exception(Request &req,Response &res,const NextFunc &next_func) {
+void StudentMangeServer::app_process_exception(Request &req,Response &res,const ServerNextFunc &next_func) {
   try {
     if (req.method() != "POST")
       throw HttpException(405, "Method Not Allowed, you must use POST method");
@@ -59,7 +59,7 @@ void StudentMangeServer::app_process_exception(Request &req,Response &res,const 
 /**
  * @input token text
  */
-void StudentMangeServer::app_token_parse(Request &req, Response &res, const NextFunc& next_func) {
+void StudentMangeServer::app_token_parse(Request &req, Response &res, const ServerNextFunc& next_func) {
   auto & body_json = req.json();
   if(body_json.find("token") == body_json.end())
     throw HttpException(403, "Unauthorized, not found token");
@@ -77,7 +77,7 @@ void StudentMangeServer::app_token_parse(Request &req, Response &res, const Next
  * @input user text
  * @input password text
  */
-void StudentMangeServer::app_login(const Request &req, Response &res, const NextFunc& next_func) {
+void StudentMangeServer::app_login(const Request &req, Response &res, const ServerNextFunc& next_func) {
   auto &req_body = req.json();
   TestJsonParam(req_body, {"user", "password"});
   Sqlite3::DBResType db_res;
@@ -98,7 +98,7 @@ void StudentMangeServer::app_login(const Request &req, Response &res, const Next
  * @url /self
  * @preass token_parse
  */
-void StudentMangeServer::app_self(const Request &req, Response &res, const NextFunc& next_func) {
+void StudentMangeServer::app_self(const Request &req, Response &res, const ServerNextFunc& next_func) {
   string user_id = req.json()["user"];
   Sqlite3::DBResType db_res;
   if (user_id.size() < 10) {
@@ -137,7 +137,7 @@ void StudentMangeServer::app_self(const Request &req, Response &res, const NextF
  * @input time_end  text
  * @input is_school bool
  */
-void StudentMangeServer::app_leave(const Request &req, Response &res, const NextFunc &next_func) {
+void StudentMangeServer::app_leave(const Request &req, Response &res, const ServerNextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
   TestJsonParam(req_body, {"leave_type", "leave_reason", "time_begin", "time_end", "is_school"});
@@ -159,7 +159,7 @@ void StudentMangeServer::app_leave(const Request &req, Response &res, const Next
  * @preass token_parse "must student"
  * @input note_id number
 */
-void StudentMangeServer::app_release(const Request &req, Response &res, const StudentMangeServer::NextFunc &next_func) {
+void StudentMangeServer::app_release(const Request &req, Response &res, const ServerNextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
   TestJsonParam(req_body, {"note_id"});
@@ -177,7 +177,7 @@ void StudentMangeServer::app_release(const Request &req, Response &res, const St
  * @input page number -unnecessary
  * @input max_num number -link to page
  */
-void StudentMangeServer::app_search_leave(const Request &req, Response &res, const NextFunc &next_func) {
+void StudentMangeServer::app_search_leave(const Request &req, Response &res, const ServerNextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
   int page = 1;
@@ -217,7 +217,7 @@ void StudentMangeServer::app_search_leave(const Request &req, Response &res, con
  * @url /search_leave
  * @preass token_parse
  */
-void StudentMangeServer::app_search_leave_num(const Request &req, Response &res, const NextFunc &next_func) {
+void StudentMangeServer::app_search_leave_num(const Request &req, Response &res, const ServerNextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
   Sqlite3::DBResType db_res;
@@ -238,7 +238,7 @@ void StudentMangeServer::app_search_leave_num(const Request &req, Response &res,
  * @input note_id number
  * @input status number
  */
-void StudentMangeServer::app_approval(const Request &req, Response &res, const NextFunc &next_func) {
+void StudentMangeServer::app_approval(const Request &req, Response &res, const ServerNextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
   TestJsonParam(req_body, {"note_id", "status"});
