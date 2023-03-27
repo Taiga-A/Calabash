@@ -38,8 +38,7 @@ A Self-sufficient web frame for linux only, used Sqlite3 database.
 
 *  [JSON for Modern C++](https://github.com/nlohmann/json)
 
-
-## Started
+## Install
 
 ### CMAKE
 
@@ -53,3 +52,12 @@ $ make .
 ### CLion With CMAKE
 
 > Just as a project.
+
+
+
+## Start
+
+
+
+
+

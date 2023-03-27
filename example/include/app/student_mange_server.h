@@ -22,7 +22,6 @@ class Sqlite3;
 constexpr char kTokenKey[] = "calabash_token_password";
 
 class StudentMangeServer {
-  using NextFunc = server_handle_next;
  private:
   StudentMangeServer() = default;
   ~StudentMangeServer() = default;
@@ -45,15 +44,15 @@ class StudentMangeServer {
  private:
   void DataBaseInit();
   // applications
-  static void app_process_exception(Request &req, Response &res, const NextFunc& next_func);
-  static void app_token_parse(Request &req, Response &res, const NextFunc& next_func);
-  void app_login(const Request &req, Response &res, const NextFunc& next_func);
-  void app_self(const Request &req, Response &res, const NextFunc& next_func);
-  void app_leave(const Request &req, Response &res, const NextFunc& next_func);
-  void app_release(const Request &req, Response &res, const NextFunc& next_func);
-  void app_search_leave(const Request &req, Response &res, const NextFunc& next_func);
-  void app_search_leave_num(const Request &req, Response &res, const NextFunc& next_func);
-  void app_approval(const Request &req, Response &res, const NextFunc& next_func);
+  static void app_process_exception(Request &req, Response &res, const ServerNextFunc& next_func);
+  static void app_token_parse(Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_login(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_self(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_leave(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_release(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_search_leave(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_search_leave_num(const Request &req, Response &res, const ServerNextFunc& next_func);
+  void app_approval(const Request &req, Response &res, const ServerNextFunc& next_func);
 
   static void TestJsonParam(const nlohmann::json &j, std::initializer_list<std::string> params);
 
