@@ -4,6 +4,7 @@ add_library(calabash_util
         data_reader.cpp
         md5.cpp
         base64.cpp
+        token.cpp
         )
 
 set(ALL_OBJECT_FILES

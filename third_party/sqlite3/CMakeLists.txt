@@ -1,4 +1,4 @@
-include_directories(include)
+include_directories(include/sqlite3)
 
 add_library(sqlite3 OBJECT sqlite3.c)
 

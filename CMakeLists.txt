@@ -17,11 +17,4 @@ SET(LIBRARY_OUTPUT_PATH  ${PROJECT_SOURCE_DIR}/out/lib)
 add_subdirectory(src)
 add_subdirectory(third_party)
 add_subdirectory(test)
-
-add_executable(server server.cpp)
-add_executable(test test.cpp)
-
-target_link_libraries(server calabash)
-target_link_libraries(test calabash)
-
-
+add_subdirectory(example)

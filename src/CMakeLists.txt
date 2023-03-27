@@ -1,4 +1,3 @@
-add_subdirectory(app)
 add_subdirectory(database)
 add_subdirectory(socket)
 add_subdirectory(thread)
@@ -14,7 +13,6 @@ set(CALABASH_ALL_LIBS
         calabash_thread
         calabash_util
         calabash_web
-        calabash_app
         )
 
 set(CALABASH_THIRD_LIBS
@@ -27,4 +25,17 @@ target_link_libraries(calabash
         ${CALABASH_THIRD_LIBS})
 
 target_include_directories(
-        calabash PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+        calabash PUBLIC
+        ${CALABASH_INCLUDE})
+
+set(COPY_INCLUDE_DIR "$<TARGET_FILE_DIR:calabash>/../include")
+add_custom_command(TARGET calabash POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${COPY_INCLUDE_DIR})
+
+foreach(INCLUDE_PATH ${CALABASH_INCLUDE})
+    add_custom_command(TARGET calabash POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${INCLUDE_PATH}"
+            "${COPY_INCLUDE_DIR}")
+endforeach()

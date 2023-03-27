@@ -11,9 +11,9 @@
 #include "functional"
 
 #include "web/server.h"
-#include "app/exception.h"
+#include "web/exception.h"
 
-//#define DB_DROP_TABLES_AT_START
+// #define DB_DROP_TABLES_AT_START
 
 namespace calabash {
 

@@ -11,6 +11,7 @@
 
 // TODO( printf Log.. )
 
+#define LOGGER_CLEAR_FILE_AT_START
 
 #define SYSTEM(s) calabash::Logger::Instance()->System(s)
 #define INFO(s) calabash::Logger::Instance()->Info(s)
@@ -23,8 +24,6 @@
   ERROR(std::string("assert false: File: ") + __FILE__ + " " + std::to_string(__LINE__), -1); \
                                                                               \
 }
-
-// #define LOGGER_CLEAR_FILE_AT_START
 
 namespace calabash {
 
