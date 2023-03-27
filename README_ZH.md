@@ -57,7 +57,7 @@ $ cmake ..
 $ make .
 ```
 
-### CLion 和CMAKE
+### CLion 和 CMAKE
 
 > 直接作为项目打开
 
@@ -83,7 +83,7 @@ int main() {
     Server server;
     server.Bind("/hello", app_hello);
     server.Listen(8080);
-	server.Start();
+    server.Start();
 }
 ```
 
@@ -110,7 +110,7 @@ int main() {
     server.Bind("/hello", app_hello);
     server.StaticPath("./static");
     server.Listen(8080);
-	server.Start();
+    server.Start();
 }
 
 // |-server.bin
@@ -129,6 +129,7 @@ int main() {
 #include <calabash/server.h>
 #include <calabash/web/request.h>
 #include <calabash/web/responce.h>
+#include <calabash/nlohmann/json.hpp>
 
 using namespace calabash;
 using namespace nlohmann; // json - third party
@@ -154,13 +155,15 @@ int main() {
     server.ProcessBind(app_first);
     server.Bind("/hello", {app_next, app_next2});
     server.Listen(8080);
-	server.Start();
+    server.Start();
 }
 ```
 
 所有被 `bind` 的url 均会执行 `ProcessBind` 的函数， `Bind` 的函数会根据 `ServerNextFunc` 的调用，依次递归调用。
 
 执行函数栈： app_first -> app_next1 -> app_next2
+
+
 
 ### 推荐的 JSON 构建方式
 
@@ -169,6 +172,7 @@ int main() {
 #include <calabash/web/request.h>
 #include <calabash/web/responce.h>
 #include <calabash/web/exception.h>
+#include <calabash/nlohmann/json.hpp>
 
 using namespace calabash;
 using namespace nlohmann; // json - third party
@@ -196,7 +200,7 @@ int main() {
     server.ProcessBind(app_first);
     server.Bind("/hello", app_hello);
     server.Listen(8080);
-	server.Start();
+    server.Start();
 }
 ```
 
