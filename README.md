@@ -11,19 +11,24 @@ A Self-sufficient web frame for linux only, used Sqlite3 database.
   * data reader, Stream and string data mixed reader, used for send file
   * object pool, A header only object pool
   * logger, A log system with `SYSTEM` `INFO` `WARNING` `ERROR` four level.
+  * token, A simple password token class with time and user for web.
 * thread
+  
   * thread pool, A header only thread pool with task queue.
 * socket
+  
   * Encapsulated linux socket api with epoll 
 * web
   * server, Http server
   * request and request maker, Read socket data to request.
   * response, Http response link util/data_reader
   * http task, Http main logic.
+  * exception, http event to send responce.
 * database
+  
   * sqlite3, Carefully encapsulated sqlite api, compiled bind sql...
-* app
-  * Example for this lib
+  
+  
 
 ## Third party
 

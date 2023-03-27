@@ -28,7 +28,7 @@ target_include_directories(
         calabash PUBLIC
         ${CALABASH_INCLUDE})
 
-set(COPY_INCLUDE_DIR "$<TARGET_FILE_DIR:calabash>/../include")
+set(COPY_INCLUDE_DIR "$<TARGET_FILE_DIR:calabash>/../include/calabash")
 add_custom_command(TARGET calabash POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory
         ${COPY_INCLUDE_DIR})
