@@ -22,7 +22,7 @@
 
 * socket
 
-  * 封装的`linxu` Socket 使用 `epoll` 事件驱动
+  * 封装的`linux` Socket 使用 `epoll` 事件驱动
 
 * web
 
