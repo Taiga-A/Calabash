@@ -53,6 +53,7 @@ void StudentMangeServer::Init(int port, const std::string &db_name) {
   http_server_->Bind("/leave", {app_token_parse, MEMBER_FUN_BIND(app_leave)});
   http_server_->Bind("/release", {app_token_parse, MEMBER_FUN_BIND(app_release)});
   http_server_->Bind("/search_leave", {app_token_parse, MEMBER_FUN_BIND(app_search_leave)});
+  http_server_->Bind("/search_leave_num", {app_token_parse, MEMBER_FUN_BIND(app_search_leave_num)});
   http_server_->Bind("/approval", {app_token_parse, MEMBER_FUN_BIND(app_approval)});
 
   is_init_ = true;
@@ -105,7 +106,7 @@ void StudentMangeServer::DataBaseInit() {
   db_->BindCompiledSQL("select_leave_status",
        "SELECT status FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("select_leave_status_teachers",
-                       "SELECT status, teacher_id, mentor_id FROM leave_info WHERE inform_id = ?1");
+       "SELECT status, teacher_id, mentor_id FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("update_leave_info_status",
        "UPDATE leave_info SET status = ?2 WHERE inform_id = ?1");
   db_->BindCompiledSQL("select_leave_info_teacher",

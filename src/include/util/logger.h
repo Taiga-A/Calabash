@@ -24,7 +24,7 @@
                                                                               \
 }
 
-#define LOGGER_CLEAR_FILE_AT_START
+// #define LOGGER_CLEAR_FILE_AT_START
 
 namespace calabash {
 

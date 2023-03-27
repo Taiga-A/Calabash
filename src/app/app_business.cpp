@@ -55,10 +55,10 @@ void StudentMangeServer::app_process_exception(Request &req,Response &res,const 
     res.BodyData(res_json.dump(2));
   }
 }
-/*
- *     "user": "0201302",
- */
 
+/**
+ * @input token text
+ */
 void StudentMangeServer::app_token_parse(Request &req, Response &res, const NextFunc& next_func) {
   auto & body_json = req.json();
   if(body_json.find("token") == body_json.end())
@@ -96,7 +96,7 @@ void StudentMangeServer::app_login(const Request &req, Response &res, const Next
 
 /**
  * @url /self
- * @input token text
+ * @preass token_parse
  */
 void StudentMangeServer::app_self(const Request &req, Response &res, const NextFunc& next_func) {
   string user_id = req.json()["user"];
@@ -130,7 +130,7 @@ void StudentMangeServer::app_self(const Request &req, Response &res, const NextF
 
 /**
  * @url /leave
- * @input token text "must student"
+ * @preass token_parse "must student"
  * @input leave_type text
  * @input leave_reason text
  * @input time_begin text
@@ -156,7 +156,7 @@ void StudentMangeServer::app_leave(const Request &req, Response &res, const Next
 
 /**
  * @url /release
- * @input token text "must student"
+ * @preass token_parse "must student"
  * @input note_id number
 */
 void StudentMangeServer::app_release(const Request &req, Response &res, const StudentMangeServer::NextFunc &next_func) {
@@ -171,6 +171,12 @@ void StudentMangeServer::app_release(const Request &req, Response &res, const St
   db_->CallCompiledSQL("update_leave_info_status", note_id, Destroyed);
 }
 
+/**
+ * @url /search_leave
+ * @preass token_parse
+ * @input page number -unnecessary
+ * @input max_num number -link to page
+ */
 void StudentMangeServer::app_search_leave(const Request &req, Response &res, const NextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
@@ -207,6 +213,31 @@ void StudentMangeServer::app_search_leave(const Request &req, Response &res, con
   throw HttpException(j);
 }
 
+/**
+ * @url /search_leave
+ * @preass token_parse
+ */
+void StudentMangeServer::app_search_leave_num(const Request &req, Response &res, const NextFunc &next_func) {
+  auto &req_body = req.json();
+  string user_id = req_body["user"];
+  Sqlite3::DBResType db_res;
+  if (user_id.size() < 10) {
+    db_res = db_->CallCompiledSQL("select_leave_info_teacher", user_id);
+    if (db_res.empty())
+      db_res = db_->CallCompiledSQL("select_leave_info_mentor", user_id);
+  } else
+    db_res = db_->CallCompiledSQL("select_leave_info_student", user_id);
+  throw HttpException(json{
+    {"num", db_res.size()}
+  });
+}
+
+/**
+ * @url approval
+ * @preass token_parse
+ * @input note_id number
+ * @input status number
+ */
 void StudentMangeServer::app_approval(const Request &req, Response &res, const NextFunc &next_func) {
   auto &req_body = req.json();
   string user_id = req_body["user"];
@@ -225,3 +256,4 @@ void StudentMangeServer::app_approval(const Request &req, Response &res, const N
     throw HttpException(200, 403, "changed status must be passed or rejection.");
   db_->CallCompiledSQL("update_leave_info_status", note_id, static_cast<int>(status_change));
 }
+

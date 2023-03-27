@@ -29,10 +29,10 @@ class StudentMangeServer {
 
  public:
   enum LeaveStatus {
-    PendingApproval = 0,  // wait
-    Passed = 1,           // pass
-    Rejection = 2,        // not pass
-    Destroyed = 3         // pass and back
+    PendingApproval = 0x01,  // wait
+    Passed = 0x02,           // pass
+    Rejection = 0x04,        // not pass
+    Destroyed = 0x08         // pass and back
   };
   static inline StudentMangeServer *Instance();
 
@@ -52,6 +52,7 @@ class StudentMangeServer {
   void app_leave(const Request &req, Response &res, const NextFunc& next_func);
   void app_release(const Request &req, Response &res, const NextFunc& next_func);
   void app_search_leave(const Request &req, Response &res, const NextFunc& next_func);
+  void app_search_leave_num(const Request &req, Response &res, const NextFunc& next_func);
   void app_approval(const Request &req, Response &res, const NextFunc& next_func);
 
   static void TestJsonParam(const nlohmann::json &j, std::initializer_list<std::string> params);
