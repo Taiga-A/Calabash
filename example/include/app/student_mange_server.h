@@ -24,35 +24,62 @@ constexpr char kTokenKey[] = "calabash_token_password";
 class StudentMangeServer {
  private:
   StudentMangeServer() = default;
+
   ~StudentMangeServer() = default;
 
  public:
-  enum LeaveStatus {
-    PendingApproval = 0x01,  // wait
-    Passed = 0x02,           // pass
-    Rejection = 0x04,        // not pass
-    Destroyed = 0x08         // pass and back
+  class StudentStatus {
+   public:
+    enum LeaveStatus {
+      PendingApproval = 0x00,  // wait
+      Passed = 0x01,           // pass
+      Rejection = 0x02,        // not pass
+    };
+    StudentStatus() = default;
+    explicit StudentStatus(int status);
+    [[nodiscard]] inline int status() const { return instructor_ | (mentor_ << 2) | (is_destroyed_ << 4); };
+    [[nodiscard]] inline bool is_passed() const { return !is_destroyed_ && mentor_ == Passed && instructor_ == Passed;}
+    LeaveStatus instructor_ = PendingApproval;
+    union {
+      LeaveStatus mentor_ = PendingApproval;
+      bool is_junior_;
+    };
+    bool is_destroyed_ = false;
   };
+
   static inline StudentMangeServer *Instance();
 
-  void Init(int port = 8080, const std::string& db_name = "calabash.db");
+  void Init(int port = 8080, const std::string &db_name = "calabash.db");
 
   void Start();
+
   [[maybe_unused]] void Stop();
+
   [[nodiscard]] inline bool Status() const { return is_start_; };
 
  private:
   void DataBaseInit();
+
   // applications
-  static void app_process_exception(Request &req, Response &res, const ServerNextFunc& next_func);
-  static void app_token_parse(Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_login(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_self(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_leave(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_release(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_search_leave(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_search_leave_num(const Request &req, Response &res, const ServerNextFunc& next_func);
-  void app_approval(const Request &req, Response &res, const ServerNextFunc& next_func);
+  static void app_process_exception(Request &req, Response &res, const ServerNextFunc &next_func);
+
+  static void app_token_parse(Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_login(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_self(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_leave(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_release(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_student_info(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_search_leave(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_search_leave_num(const Request &req, Response &res, const ServerNextFunc &next_func);
+
+  void app_approval(const Request &req, Response &res, const ServerNextFunc &next_func);
 
   static void TestJsonParam(const nlohmann::json &j, std::initializer_list<std::string> params);
 
@@ -71,7 +98,6 @@ StudentMangeServer *StudentMangeServer::Instance() {
   }
   return p;
 }
-
 
 } // namespace calabash
 

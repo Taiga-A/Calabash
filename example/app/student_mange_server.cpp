@@ -52,6 +52,7 @@ void StudentMangeServer::Init(int port, const std::string &db_name) {
   http_server_->Bind("/self", {app_token_parse, MEMBER_FUN_BIND(app_self)});
   http_server_->Bind("/leave", {app_token_parse, MEMBER_FUN_BIND(app_leave)});
   http_server_->Bind("/release", {app_token_parse, MEMBER_FUN_BIND(app_release)});
+  http_server_->Bind("/student_info", {app_token_parse, MEMBER_FUN_BIND(app_student_info)});
   http_server_->Bind("/search_leave", {app_token_parse, MEMBER_FUN_BIND(app_search_leave)});
   http_server_->Bind("/search_leave_num", {app_token_parse, MEMBER_FUN_BIND(app_search_leave_num)});
   http_server_->Bind("/approval", {app_token_parse, MEMBER_FUN_BIND(app_approval)});
@@ -91,12 +92,10 @@ void StudentMangeServer::DataBaseInit() {
        "INSERT INTO teachers(id, name, sex, age, tel, password)"
        "VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
   db_->BindCompiledSQL("insert_leave_info",
-       "INSERT INTO leave_info(student_id, mentor_id, teacher_id, leave_type, leave_reason, time_begin, time_end, is_school, status)"
+       "INSERT INTO leave_info(student_id, mentor_id, instructor_id, leave_type, leave_reason, time_begin, time_end, is_school, status)"
        "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)");
   db_->BindCompiledSQL("student_info",
        "SELECT * FROM students WHERE id = ?1");
-  db_->BindCompiledSQL("student_teachers",
-       "SELECT instructor_id, mentor_id FROM students WHERE id = ?1");
   db_->BindCompiledSQL("student_password",
        "SELECT password FROM students WHERE id = ?1");
   db_->BindCompiledSQL("teacher_info",
@@ -106,11 +105,11 @@ void StudentMangeServer::DataBaseInit() {
   db_->BindCompiledSQL("select_leave_status",
        "SELECT status FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("select_leave_status_teachers",
-       "SELECT status, teacher_id, mentor_id FROM leave_info WHERE inform_id = ?1");
+       "SELECT status, instructor_id, mentor_id FROM leave_info WHERE inform_id = ?1");
   db_->BindCompiledSQL("update_leave_info_status",
        "UPDATE leave_info SET status = ?2 WHERE inform_id = ?1");
-  db_->BindCompiledSQL("select_leave_info_teacher",
-       "SELECT * FROM leave_info WHERE teacher_id = ?1");
+  db_->BindCompiledSQL("select_leave_info_instructor",
+       "SELECT * FROM leave_info WHERE instructor_id = ?1");
   db_->BindCompiledSQL("select_leave_info_mentor",
        "SELECT * FROM leave_info WHERE mentor_id = ?1");
   db_->BindCompiledSQL("select_leave_info_student",
@@ -127,5 +126,9 @@ void StudentMangeServer::TestJsonParam(const nlohmann::json &j, std::initializer
     throw HttpException(403, "Lost param : " + string(lost_params.c_str() + 2));
 }
 
-
+StudentMangeServer::StudentStatus::StudentStatus(int status) {
+  this->is_destroyed_ = 0x01 & (status >> 4);
+  this->instructor_ = static_cast<LeaveStatus>(0x03 & status);
+  this->mentor_ = static_cast<LeaveStatus>(0x03 & (status >> 2));
+}
 

@@ -45,12 +45,13 @@ class Logger {
 
   static inline void Console(const std::string &s, const char *file, int line);
 
+  inline static tm *GetNowTime();
+
  private:
   Logger() = default;
   ~Logger();
 
   void Log(const std::string &s);
-  inline static tm *GetNowTime();
   inline static std::_Put_time<char> GetTimeStr();
   inline static std::string GetFileNameByDate();
 

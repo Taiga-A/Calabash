@@ -2,7 +2,7 @@
 "  inform_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
 "  student_id TEXT NOT NULL,\n"
 "  mentor_id TEXT NOT NULL,\n"
-"  teacher_id TEXT NOT NULL,\n"
+"  instructor_id TEXT NOT NULL,\n"
 "  leave_type TEXT NOT NULL,\n"
 "  leave_reason TEXT NOT NULL,\n"
 "  time_begin TEXT NOT NULL,\n"

@@ -135,19 +135,19 @@ using namespace calabash;
 using namespace nlohmann; // json - third party
 
 void app_first(Request &req, Responce &res, ServerNextFunc &next) {
-	string str = req.body();
+    string str = req.body();
     req.json() = json::parse(str);
     next();	// run next function
 }
 
 void app_next1(Request &req, Responce &res, ServerNextFunc &next) {
-	// do something
+    // do something
     next();	// run app_next2
     // go on do something
 }
 
 void app_next2(Request &req, Responce &res, ServerNextFunc &next) {
-	// do something other
+    // do something other
 }
 
 int main() {
@@ -165,7 +165,7 @@ int main() {
 
 
 
-### 推荐的 JSON 构建方式
+### 推荐的 JSON-WEB 服务构建方式
 
 ``` c++
 #include <calabash/server.h>
@@ -186,12 +186,15 @@ void app_exception(Request &req, Responce &res, ServerNextFunc &next) {
             {"code", e.code()},
             {"msg", e.what()}
         }.dump(2));
+        res.SetJsonType();
     }
 }
-void app_first(Request &req, Responce &res, ServerNextFunc &next) {}
+void app_first(Request &req, Responce &res, ServerNextFunc &next) {
+    // do some thing 
+}
 void app_hello(Request &req, Responce &res, ServerNextFunc &next) {
     // do something
-    throw HttpException(200, "hello calabash!");
+    throw HttpException(200, "hello calabash!");  // send data
 }
 
 int main() {

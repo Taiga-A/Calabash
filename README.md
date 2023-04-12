@@ -1,4 +1,6 @@
 # Calabash
+[中文README](https://github.com/Taiga-A/Calabash/blob/master/README_ZH.md)
+
 A Self-sufficient web frame for linux only, used Sqlite3 database.
 
 *stdc++ version must higher than C++17* 

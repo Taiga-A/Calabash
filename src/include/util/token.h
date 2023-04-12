@@ -10,7 +10,6 @@
 
 namespace calabash {
 
-
 class Token {
   using token_time_t = std::chrono::time_point<std::chrono::system_clock>;
 
@@ -32,7 +31,6 @@ class Token {
   std::string user_id_;
   token_time_t end_time_;
 };
-
 
 } // namespace calabash
 

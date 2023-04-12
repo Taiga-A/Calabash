@@ -2,7 +2,7 @@
 "  id TEXT PRIMARY KEY,\n"
 "  name TEXT NOT NULL,\n"
 "  specialty TEXT NOT NULL,\n"
-"  class TEXT NOT NULL,\n"
+"  class INTEGER NOT NULL,\n"
 "  sex TEXT NOT NULL,\n"
 "  tel TEXT NOT NULL,\n"
 "  password TEXT NOT NULL,\n"

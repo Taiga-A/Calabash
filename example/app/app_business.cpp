@@ -9,6 +9,7 @@
 #include "app/student_mange_server.h"
 #include "util/token.h"
 #include "database/sqlite3.h"
+#include "util/logger.h"
 
 using namespace nlohmann;
 using namespace calabash;
@@ -28,14 +29,14 @@ void StudentMangeServer::app_process_exception(Request &req,Response &res,const 
         {"msg", "ok"}
     };
     res.SetJsonType();
-    res.BodyData(res_json.dump(2));
+    res.BodyData(res_json.dump());
   } catch (const HttpException &e) {
     res.set_code(e.base_code());
     json res_json = e.body();
     res_json["code"] = e.code();
     res_json["msg"] = e.msg();
     res.SetJsonType();
-    res.BodyData(res_json.dump(2));
+    res.BodyData(res_json.dump());
   } catch (const json::exception &e) {
     res.set_code(403);
     json res_json = {
@@ -43,7 +44,7 @@ void StudentMangeServer::app_process_exception(Request &req,Response &res,const 
         {"msg", e.what()}
     };
     res.SetJsonType();
-    res.BodyData(res_json.dump(2));
+    res.BodyData(res_json.dump());
   } catch (const exception &e) {
     cout << "er:" << e.what() <<  endl;
     res.set_code(300);
@@ -52,7 +53,7 @@ void StudentMangeServer::app_process_exception(Request &req,Response &res,const 
         {"msg", "UnKnow Error"}
     };
     res.SetJsonType();
-    res.BodyData(res_json.dump(2));
+    res.BodyData(res_json.dump());
   }
 }
 
@@ -119,7 +120,7 @@ void StudentMangeServer::app_self(const Request &req, Response &res, const Serve
         {"id", db_res[0][0].text_data},
         {"name", db_res[0][1].text_data},
         {"specialty", db_res[0][2].text_data},
-        {"class", db_res[0][3].text_data},
+        {"class", db_res[0][3].int_data},
         {"sex", db_res[0][4].text_data},
         {"tel", db_res[0][5].text_data},
         {"instructor", db_res[0][7].text_data},
@@ -141,17 +142,27 @@ void StudentMangeServer::app_leave(const Request &req, Response &res, const Serv
   auto &req_body = req.json();
   string user_id = req_body["user"];
   TestJsonParam(req_body, {"leave_type", "leave_reason", "time_begin", "time_end", "is_school"});
-  Sqlite3::DBResType db_res = db_->CallCompiledSQL("student_teachers", user_id);
+  Sqlite3::DBResType db_res = db_->CallCompiledSQL("student_info", user_id);
   if (db_res.size() != 1) throw HttpException(404, "Not found student's teachers");
-  string mentor_id = db_res[0][1].text_data;
-  string instructor_id = db_res[0][0].text_data;
+  string mentor_id = db_res[0][8].text_data;
+  string instructor_id = db_res[0][7].text_data;
   string leave_type = req_body["leave_type"].get<string>();
   string leave_reason = req_body["leave_reason"].get<string>();
   string time_begin = req_body["time_begin"].get<string>();
   string time_end = req_body["time_end"].get<string>();
   bool is_school = req_body["is_school"].get<bool>();
+
+  auto now = Logger::GetNowTime();
+  int graduate_year = db_res[0][3].int_data + 4;
+
+  bool is_graduate = now->tm_year - graduate_year == 0
+      || now->tm_year - graduate_year == 1 && now->tm_mon > 8;
+
+  StudentStatus status;
+  status.is_junior_ = !is_graduate;
+
   db_->CallCompiledSQL("insert_leave_info",
-       user_id, mentor_id, instructor_id, leave_type, leave_reason, time_begin, time_end, is_school, PendingApproval);
+       user_id, mentor_id, instructor_id, leave_type, leave_reason, time_begin, time_end, is_school, status.status());
 }
 
 /**
@@ -166,9 +177,37 @@ void StudentMangeServer::app_release(const Request &req, Response &res, const Se
   int note_id = static_cast<int>(req_body["note_id"].get<double>());
   Sqlite3::DBResType db_res = db_->CallCompiledSQL("select_leave_status", note_id);
   if (db_res.size() != 1) throw HttpException(404, "Not found leave info");
-  auto status = static_cast<LeaveStatus>(db_res[0][0].int_data);
-  if (status != LeaveStatus::Passed) throw HttpException(200, 403, "status must be passed.");
-  db_->CallCompiledSQL("update_leave_info_status", note_id, Destroyed);
+  auto status = StudentStatus(db_res[0][0].int_data);
+  if (!status.is_passed()) throw HttpException(200, 403, "status must be passed.");
+  status.is_destroyed_ = true;
+  db_->CallCompiledSQL("update_leave_info_status", note_id, status.status());
+}
+
+/**
+ * @url /student_info
+ * @preass token_parse teacher
+ * @input id text
+ */
+void StudentMangeServer::app_student_info(const Request &req, Response &res, const ServerNextFunc& next_func) {
+    auto &req_body = req.json();
+    string user_id = req_body["user"];
+    TestJsonParam(req_body, {"id"});
+    Sqlite3::DBResType db_res;
+    if (user_id.size() < 10) {
+        db_res = db_->CallCompiledSQL("student_info", req_body["id"].get<string>());
+        if (db_res.size() != 1) throw HttpException(404, "not found user");
+        throw HttpException(json{{"data", {
+                {"id", db_res[0][0].text_data},
+                {"name", db_res[0][1].text_data},
+                {"specialty", db_res[0][2].text_data},
+                {"class", db_res[0][3].int_data},
+                {"sex", db_res[0][4].text_data},
+                {"tel", db_res[0][5].text_data},
+                {"instructor", db_res[0][7].text_data},
+                {"mentor", db_res[0][8].text_data},
+        }}});
+    }
+    throw HttpException(403, "You must be teacher.");
 }
 
 /**
@@ -188,7 +227,7 @@ void StudentMangeServer::app_search_leave(const Request &req, Response &res, con
   }
   Sqlite3::DBResType db_res;
   if (user_id.size() < 10) {
-    db_res = db_->CallCompiledSQL("select_leave_info_teacher", user_id);
+    db_res = db_->CallCompiledSQL("select_leave_info_instructor", user_id);
     if (db_res.empty())
       db_res = db_->CallCompiledSQL("select_leave_info_mentor", user_id);
   } else
@@ -201,7 +240,7 @@ void StudentMangeServer::app_search_leave(const Request &req, Response &res, con
        {"inform_id", db_res[i][0].int_data},
        {"student_id", db_res[i][1].text_data},
        {"mentor_id", db_res[i][2].text_data},
-       {"teacher_id", db_res[i][3].text_data},
+       {"instructor_id", db_res[i][3].text_data},
        {"leave_type", db_res[i][4].text_data},
        {"leave_reason", db_res[i][5].text_data},
        {"time_begin", db_res[i][6].text_data},
@@ -214,7 +253,7 @@ void StudentMangeServer::app_search_leave(const Request &req, Response &res, con
 }
 
 /**
- * @url /search_leave
+ * @url /search_leave_num
  * @preass token_parse
  */
 void StudentMangeServer::app_search_leave_num(const Request &req, Response &res, const ServerNextFunc &next_func) {
@@ -222,7 +261,7 @@ void StudentMangeServer::app_search_leave_num(const Request &req, Response &res,
   string user_id = req_body["user"];
   Sqlite3::DBResType db_res;
   if (user_id.size() < 10) {
-    db_res = db_->CallCompiledSQL("select_leave_info_teacher", user_id);
+    db_res = db_->CallCompiledSQL("select_leave_info_instructor", user_id);
     if (db_res.empty())
       db_res = db_->CallCompiledSQL("select_leave_info_mentor", user_id);
   } else
@@ -246,14 +285,21 @@ void StudentMangeServer::app_approval(const Request &req, Response &res, const S
   Sqlite3::DBResType db_res = db_->CallCompiledSQL("select_leave_status_teachers", note_id);
   if (db_res.size() != 1)
     throw HttpException(404, "Not found this leave.");
-  auto status = static_cast<LeaveStatus>(db_res[0][0].int_data);
+  auto status = StudentStatus(db_res[0][0].int_data);
   if (user_id != db_res[0][1].text_data && user_id != db_res[0][2].text_data)
     throw HttpException(403, "No permissions, you must be leave's teacher.");
-  if (status != LeaveStatus::PendingApproval)
-    throw HttpException(200, 403, "status must be pending approval.");
-  auto status_change = static_cast<LeaveStatus>(req_body["status"].get<int>());
-  if (status_change != LeaveStatus::Passed && status_change != LeaveStatus::Rejection)
-    throw HttpException(200, 403, "changed status must be passed or rejection.");
-  db_->CallCompiledSQL("update_leave_info_status", note_id, static_cast<int>(status_change));
+  if (user_id == db_res[0][1].text_data) { // instructor
+    if (status.instructor_ != StudentStatus::LeaveStatus::PendingApproval)
+      throw HttpException(200, 403, "status must be pending approval.");
+    if(req_body["status"].get<bool>()) status.instructor_ = StudentStatus::LeaveStatus::Passed;
+    else status.instructor_ = StudentStatus::LeaveStatus::Rejection;
+  }
+  if (user_id == db_res[0][2].text_data) { // mentor
+    if (status.mentor_ != StudentStatus::LeaveStatus::PendingApproval)
+      throw HttpException(200, 403, "status must be pending approval.");
+    if(req_body["status"].get<bool>()) status.mentor_ = StudentStatus::LeaveStatus::Passed;
+    else status.mentor_ = StudentStatus::LeaveStatus::Rejection;
+  }
+  db_->CallCompiledSQL("update_leave_info_status", note_id, status.status());
 }
 
